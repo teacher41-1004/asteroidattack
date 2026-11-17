@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asteroid Attack</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#030407;--panel:rgba(14,17,28,.88);--text:#e8ecf6;--muted:#9aa3bd;--line:#2a3150;--accent:#6ea8ff;--gap:#ffd479;--ok:#22c55e;--bad:#ef4444}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 20% 0%,#0b1020 0,var(--bg) 60%) fixed;color:var(--text);font:18px/1.9 Georgia,'Times New Roman',serif;min-height:100vh;overflow-x:hidden}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:
+radial-gradient(1.5px 1.5px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 33% 72%,#cfd8ff,transparent),radial-gradient(1.5px 1.5px at 58% 30%,#fff,transparent),radial-gradient(1px 1px at 77% 62%,#fff,transparent),radial-gradient(1px 1px at 90% 12%,#cfd8ff,transparent),radial-gradient(1px 1px at 45% 90%,#fff,transparent),radial-gradient(1.5px 1.5px at 6% 88%,#fff,transparent),radial-gradient(1px 1px at 68% 8%,#fff,transparent);background-size:420px 420px}
+.deco{position:fixed;z-index:0;pointer-events:none}
+.earth{right:-90px;top:70px;width:300px;opacity:.9}
+.ast1{left:-30px;top:38%;width:130px;opacity:.75}
+.ast2{right:6%;bottom:8%;width:90px;opacity:.7}
+.ast3{left:8%;bottom:4%;width:60px;opacity:.6}
+main{position:relative;z-index:1;width:100%;max-width:1500px;margin:0 auto;padding:36px 48px 60px}
+h1{font:800 clamp(26px,5vw,40px)/1.15 system-ui,sans-serif;margin:8px 0 6px;letter-spacing:.3px}
+h1 span{color:var(--accent)}
+.sub{font:15px/1.5 system-ui,sans-serif;color:var(--muted);margin:0 0 18px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:600 15px system-ui,sans-serif;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.track{flex:1;height:8px;border-radius:8px;background:#1b2140;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#6ea8ff,#a78bfa);transition:width .25s}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;backdrop-filter:blur(4px)}
+.card p{margin:0 0 18px}.card p:last-child{margin:0}
+#passage{font-size:20px;line-height:2;padding:30px 44px;scroll-margin-top:80px}
+#results{width:100%}
+.lead{font:700 .85em system-ui,sans-serif;letter-spacing:.6px;color:var(--accent)}
+.gap{display:inline-block;min-width:92px;padding:0 8px;margin:0 2px;border-bottom:2px dotted var(--gap);background:rgba(255,212,121,.09);border-radius:6px 6px 0 0;color:var(--gap);font:600 1em system-ui,sans-serif;cursor:pointer;text-align:center;line-height:1.6;transition:background .15s}
+.gap:hover,.gap:focus-visible{background:rgba(255,212,121,.2);outline:none}
+.gap.done{border-bottom:2px solid var(--accent);background:rgba(110,168,255,.15);color:#fff}
+.gap.warn{animation:pulse .9s 2}
+@keyframes pulse{50%{background:rgba(239,68,68,.4)}}
+.gap.ok{border-bottom:2px solid var(--ok);background:rgba(34,197,94,.2);color:#4ade80;font-weight:700;cursor:default}
+.gap.bad{border-bottom:2px solid var(--bad);background:rgba(239,68,68,.2);color:#ff5c5c;font-weight:700;cursor:default}
+.fix{color:#4ade80;font:700 1em system-ui,sans-serif;margin-left:4px}
+#pop{position:absolute;z-index:50;display:none;width:260px;background:#10152a;border:1px solid var(--accent);border-radius:12px;padding:6px;box-shadow:0 12px 34px rgba(0,0,0,.6);font:16px/1.3 system-ui,sans-serif}
+#pop .t{font-size:12px;color:var(--muted);padding:4px 8px}
+#pop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px 12px;border-radius:8px;font:inherit;font-size:20px;cursor:pointer}
+#pop button:hover,#pop button.sel{background:rgba(110,168,255,.22)}
+#pop button b{color:var(--accent);margin-right:8px}
+.actions{text-align:center;margin:26px 0 6px}
+.btn{font:700 17px system-ui,sans-serif;padding:14px 34px;border:0;border-radius:999px;color:#fff;background:linear-gradient(90deg,#3b82f6,#8b5cf6);cursor:pointer;box-shadow:0 6px 22px rgba(80,100,255,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.msg{font:14px system-ui,sans-serif;color:#ffb4b4;min-height:20px;margin-top:10px}
+#results{display:none;margin-top:28px}
+.score{text-align:center;font-family:system-ui,sans-serif}
+.score .big{font-size:56px;font-weight:800;line-height:1.1}
+.score .pct{color:var(--muted);font-size:20px;margin-bottom:14px}
+.chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.chip{padding:8px 16px;border-radius:999px;font-weight:700;font-size:15px}
+.chip.g{background:rgba(34,197,94,.18);color:#7dffa9}.chip.r{background:rgba(239,68,68,.18);color:#ff9d9d}
+h2{font:700 20px system-ui,sans-serif;margin:28px 0 12px}
+.row{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:10px 14px;border-radius:10px;margin-bottom:8px;font:20px/1.4 system-ui,sans-serif;border:1px solid var(--line);background:rgba(10,13,24,.8)}
+.row.ok{border-color:rgba(34,197,94,.6)}.row.bad{border-color:rgba(239,68,68,.6)}
+.row .n{font-weight:800;width:26px;color:var(--accent)}
+.row .o{color:var(--muted);flex:1 1 100%;font-size:20px}
+.tag{font-weight:700}.tag.ok{color:#7dffa9}.tag.bad{color:#ff9d9d}
+@media(max-width:600px){
+body{font-size:17px}.card{padding:16px}
+main{padding:20px 14px 40px}#passage{font-size:20px;line-height:1.9;padding:16px}
+.earth{width:200px;right:-70px;top:90px;opacity:.55}.ast1,.ast2,.ast3{opacity:.35}
+#pop{position:fixed;left:10px!important;right:10px;top:auto!important;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto}
+#pop button{padding:14px 12px;font-size:20px}}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<svg width="0" height="0" style="position:absolute"><defs>
+<radialGradient id="eg" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#5fb4ff"/><stop offset=".6" stop-color="#1c5fb8"/><stop offset="1" stop-color="#071a3f"/></radialGradient>
+<radialGradient id="ag" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#9a9aa6"/><stop offset="1" stop-color="#3a3a46"/></radialGradient>
+<g id="rock"><path d="M50 6 78 14 94 40 88 72 62 94 30 90 8 64 12 30 30 12Z" fill="url(#ag)"/><circle cx="38" cy="36" r="9" fill="#2c2c36" opacity=".7"/><circle cx="66" cy="58" r="12" fill="#2c2c36" opacity=".6"/><circle cx="40" cy="70" r="5" fill="#2c2c36" opacity=".7"/></g>
+</defs></svg>
+<svg class="deco earth" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="url(#eg)"/><path d="M50 60c18-12 34-6 40 8-8 14-26 10-34 22-12-6-14-20-6-30ZM110 110c16-8 32 0 36 16-4 18-22 24-32 12-6-10-8-20-4-28ZM120 40c10-4 22 2 24 10-8 6-20 6-24-10Z" fill="#3aa56a" opacity=".85"/><path d="M30 120c20 6 30 22 20 40" stroke="#fff" stroke-opacity=".25" stroke-width="6" fill="none"/><circle cx="100" cy="100" r="96" fill="none" stroke="#8cc8ff" stroke-opacity=".35" stroke-width="3"/></svg>
+<svg class="deco ast1" viewBox="0 0 100 100"><use href="#rock"/></svg>
+<svg class="deco ast2" viewBox="0 0 100 100"><use href="#rock"/></svg>
+<svg class="deco ast3" viewBox="0 0 100 100"><use href="#rock"/></svg>
+
+<main>
+<h1>Asteroid <span>Attack</span></h1>
+<p class="sub">Read the passage. Click each dotted gap and choose the word that fits best. You can change your answers before you submit.</p>
+<div class="bar"><span id="count">0/9 answered</span><div class="track"><div class="fill" id="fill"></div></div></div>
+<div class="card" id="passage"></div>
+<div class="actions"><button class="btn" id="submit">Submit Answers</button><div class="msg" id="msg"></div></div>
+<section id="results"></section>
+</main>
+<div id="pop" role="listbox"></div>
+
+<script>
+var Q=[
+{o:["concept","plot","review","report"],a:1},
+{o:["along","amongst","beneath","throughout"],a:0},
+{o:["blinked","displayed","searched","spotted"],a:3},
+{o:["absolutely","actually","completely","exactly"],a:3},
+{o:["browses","broadcasts","collects","observes"],a:2},
+{o:["did","got","had","made"],a:3},
+{o:["cover","pass","travel","tour"],a:1},
+{o:["burned","exploded","erupted","smashed"],a:1},
+{o:["fallen","knocked","run","taken"],a:1}];
+var L="ABCD";
+var P=[
+"<span class='lead'>IT COULD EASILY BE THE</span> {0} <span class='lead'>FOR A HOLLYWOOD DISASTER MOVIE:</span> in February 2012, a young dentist called Jaime Nomen was sailing {1} the Mediterranean coast of Spain, checking images on his laptop from a telescope 600 kilometres away. Suddenly, he {2} a dot of light racing through space. Nomen knew {3} what it was. He warned the International Astronomical Union, which {4} information about asteroids, and telescopes around the world immediately started following the new asteroid’s orbit. They {5} a spectacular discovery: on 15th February 2013, ‘Asteroid 2012 DA14’ would {6} the Earth just 27,700 kilometres above our heads. In space terms, that is close – very close. Asteroid 2012 DA14 was 30 metres across, which is enormous, but not quite as large as the asteroid that {7} in 1908 over the remote Tunguska region of Siberia, Russia. The Tunguska event destroyed 80 million trees across 2,000 square kilometres and even people over 60 kilometres away were {8} over.",
+"<span class='lead'>STRANGELY ENOUGH,</span> on the same day in February 2013 that Asteroid 2012 DA14 passed the Earth, a slightly smaller asteroid suddenly appeared over the Chelyabinsk region of Russia. It was travelling at 70,000 km/h and was apparently almost as bright as the Sun. It was around 17 metres across, easily the largest object to enter the Earth’s atmosphere since 1908. It exploded before it hit the Earth, and a massive shock wave cracked glass and ruined buildings hundreds of kilometres away.",
+"<span class='lead'>IN TERMS OF POTENTIAL DAMAGE,</span> a Tunguska-sized asteroid (50–100 metres across) would be a good deal worse. It could easily destroy a city, and at sea it would trigger a terrible tsunami. Some asteroids are far bigger than that – up to 10 kilometres across – and would generate such a powerful explosion that clouds of dust would cover the Earth for years. This means life on Earth could even be in danger. A huge asteroid like this crashed in the Yucatán Peninsula in Mexico 65 million years ago and contributed to the death of a lot of plant and animal life on Earth – including the extinction of the dinosaurs.",
+"<span class='lead'>SO HOW CAN WE PREDICT FUTURE ASTEROID CRASHES</span> and, more importantly, can we prevent them? Asteroid scientists believe they have identified 90% of the giant space rocks with the potential to hit the Earth, but the smaller the asteroids are, the harder it is to spot them. However, smaller asteroids are likely to cause less destruction if they hit the Earth.",
+"<span class='lead'>TO PREVENT A MAJOR DISASTER LIKE YUCATÁN,</span> it would be far too risky to blow up an asteroid with a bomb. This would break it into millions of pieces, but thousands of smaller rocks would still hit the Earth. In the long term, the best way to avoid a serious incident is to use a spacecraft to push an asteroid in a different direction, over a period of five to ten years. But the pushing technique is so slow that an asteroid might hit the Earth before its orbit has moved far enough away. Scientists need more time to find faster ways of protecting Earth from asteroids, which is why, in the short term, it is so vital that we keep an eye on every single asteroid heading for the Earth.",
+"<span class='lead'>IF THIS ALL SOUNDS RATHER TERRIFYING, RELAX.</span> There are no confirmed reports of human death being caused by rocks from space. The vast majority of the Earth’s surface is unpopulated, so the chances of something landing on your head are pretty small."];
+
+var ans,done,openIdx;
+var $=function(s){return document.querySelector(s)};
+var pop=$("#pop");
+
+function gapHTML(i){
+  var cls="gap",txt="("+i+") ........";
+  if(done){
+    var ok=ans[i]===Q[i].a;
+    cls+=ok?" ok":" bad";
+    var s=ans[i]==null?"—":Q[i].o[ans[i]];
+    return "<span class='"+cls+"'>("+i+") "+s+"</span>"+(ok?"":"<span class='fix'>("+Q[i].o[Q[i].a]+")</span>");
+  }
+  if(ans[i]!=null){cls+=" done";txt="("+i+") "+Q[i].o[ans[i]]}
+  return "<span class='"+cls+"' data-i='"+i+"' role='button' tabindex='0' aria-haspopup='listbox'>"+txt+"</span>";
+}
+function render(){
+  $("#passage").innerHTML=P.map(function(p){
+    return "<p>"+p.replace(/\{(\d)\}/g,function(_,i){return gapHTML(+i)})+"</p>"}).join("");
+  var n=ans.filter(function(v){return v!=null}).length;
+  $("#count").textContent=n+"/9 answered";
+  $("#fill").style.width=(n/9*100)+"%";
+}
+function closePop(){pop.style.display="none";openIdx=null}
+function openPop(i,el){
+  openIdx=i;
+  pop.innerHTML="<div class='t'>Question "+i+"</div>"+Q[i].o.map(function(o,k){
+    return "<button data-k='"+k+"' class='"+(ans[i]===k?"sel":"")+"'><b>"+L[k]+"</b>"+o+"</button>"}).join("");
+  pop.style.display="block";
+  if(innerWidth>600){
+    var r=el.getBoundingClientRect();
+    pop.style.left=Math.max(8,Math.min(r.left+scrollX,scrollX+innerWidth-272))+"px";
+    pop.style.top=(r.bottom+scrollY+6)+"px";
+  }
+}
+document.addEventListener("click",function(e){
+  var g=e.target.closest(".gap[data-i]");
+  if(g&&!done){e.stopPropagation();var i=+g.dataset.i;if(openIdx===i){closePop()}else openPop(i,g);return}
+  var b=e.target.closest("#pop button");
+  if(b){ans[openIdx]=+b.dataset.k;closePop();$("#msg").textContent="";render();return}
+  if(!e.target.closest("#pop"))closePop();
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape")closePop();
+  if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("gap")&&e.target.dataset.i){e.preventDefault();e.target.click()}
+});
+$("#submit").onclick=function(){
+  if(done)return;
+  var miss=[];ans.forEach(function(v,i){if(v==null)miss.push(i)});
+  if(miss.length){
+    $("#msg").textContent="Please answer all gaps first. Missing: "+miss.join(", ")+".";
+    miss.forEach(function(i){var g=document.querySelector(".gap[data-i='"+i+"']");if(g){g.classList.add("warn")}});
+    var f=document.querySelector(".gap[data-i='"+miss[0]+"']");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  done=true;closePop();render();showResults();
+  $("#submit").disabled=true;
+};
+function showResults(){
+  var c=0;ans.forEach(function(v,i){if(v===Q[i].a)c++});
+  var w=9-c,pct=Math.round(c/9*100);
+  var rows=Q.map(function(q,i){
+    var ok=ans[i]===q.a;
+    return "<div class='row "+(ok?"ok":"bad")+"'><span class='n'>"+i+"</span>"+
+    "<span>Your answer: <b>"+L[ans[i]]+". "+q.o[ans[i]]+"</b></span>"+
+    "<span class='tag "+(ok?"ok":"bad")+"'>"+(ok?"✔ Correct":"✘ Incorrect — correct answer: "+L[q.a]+". "+q.o[q.a])+"</span>"+
+    "<span class='o'>"+q.o.map(function(o,k){return L[k]+". "+o}).join(" | ")+"</span></div>"}).join("");
+  var r=$("#results");
+  r.innerHTML="<div class='card score'><div class='big'>"+c+" / 9</div><div class='pct'>"+pct+"%</div>"+
+  "<div class='chips'><span class='chip g'>Correct: "+c+"</span><span class='chip r'>Incorrect: "+w+"</span></div></div>"+
+  "<h2>Review Answers</h2>"+rows+
+  "<div class='actions'><button class='btn' id='again'>Play Again</button></div>";
+  r.style.display="block";
+  $("#again").onclick=reset;
+  $("#passage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function reset(){
+  ans=new Array(9).fill(null);done=false;
+  $("#results").style.display="none";$("#results").innerHTML="";
+  $("#submit").disabled=false;$("#msg").textContent="";
+  render();scrollTo({top:0,behavior:"smooth"});
+}
+reset();
+</script>
+</body>
+</html>
